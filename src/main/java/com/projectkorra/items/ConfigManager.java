@@ -1,10 +1,10 @@
 package com.projectkorra.items;
 
-import annotations.projectkorra.NotNull;
 import com.projectkorra.items.attribute.Attribute;
 import com.projectkorra.items.customs.PKItem;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
 
@@ -57,7 +57,7 @@ public class ConfigManager {
 		}
 	}
 
-	private void loadItem(@NotNull String itemName, @NotNull Set<String> customItemNames, @NotNull ConfigurationSection itemConfig) {
+	private void loadItem(@NonNull String itemName, @NonNull Set<String> customItemNames, @NonNull ConfigurationSection itemConfig) {
 		PKItem item = new PKItem();
 		item.updateName(itemName);
 		Set<String> keys = itemConfig.getKeys(false);
@@ -98,15 +98,14 @@ public class ConfigManager {
 					updateAttributes(item, Objects.requireNonNull(itemConfig.getConfigurationSection(key)));
 					break;
 				case GLOW_PREF:
-					ProjectKorraItems.log.info(Messages.BAD_ATTRIBUTE + " (" + GLOW_PREF + ")");
-					// item.updateGlow(itemConfig.getBoolean(key));
+					item.updateGlow(itemConfig.getBoolean(key));
 					break;
 			}
 		}
 		item.build();
 	}
 
-	private void updateAttributes(@NotNull PKItem item, @NotNull ConfigurationSection cs) {
+	private void updateAttributes(@NonNull PKItem item, @NonNull ConfigurationSection cs) {
 		for (String attributeName : cs.getKeys(false)) {
 			Attribute att = Attribute.getAttribute(attributeName);
 			if (att == null) {

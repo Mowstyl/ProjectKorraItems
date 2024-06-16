@@ -40,6 +40,7 @@ public class PKItem {
 	private boolean unshapedRecipe;
 	private boolean valid;
 	private boolean alreadyFinal;
+	private Boolean glow;
 	private List<Attribute> attributes;
 
 	public PKItem() {
@@ -54,6 +55,7 @@ public class PKItem {
 		recipe = new ArrayList<>();
 		valid = true;
 		unshapedRecipe = true;
+		glow = null;
 		attributes = new ArrayList<>();
 	}
 
@@ -131,6 +133,10 @@ public class PKItem {
 		}
 	}
 	*/
+
+	public void updateGlow(Boolean glow) {
+		this.glow = glow;
+	}
 
 	/**
 	 * Updates this CustomItem with a new Recipe. The recipe will consist of
@@ -250,6 +256,7 @@ public class PKItem {
 			PersistentDataContainer itemDC = meta.getPersistentDataContainer();
 			itemDC.set(PKI_KEY, PersistentDataType.STRING, name);
 
+			meta.setEnchantmentGlintOverride(glow);
 			istack.setItemMeta(meta);
 		}
 
