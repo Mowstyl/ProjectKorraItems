@@ -136,7 +136,7 @@ public class AttributeListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Bukkit.getScheduler().runTaskLater(ProjectKorraItems.plugin, () -> {
 			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(event.getPlayer());
-			if (!bendingPlayer.hasElement(Element.WATER)) {
+			if (bendingPlayer == null || !bendingPlayer.hasElement(Element.WATER)) {
 				return;
 			}
 			List<ItemStack> equipment = ItemUtils.getPlayerValidEquipment(event.getPlayer());
