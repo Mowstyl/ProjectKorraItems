@@ -10,10 +10,11 @@ plugins {
 }
 
 group = "com.projectkorra"
-version = "1.7.0-SNAPSHOT"
+version = "2.0.0-SNAPSHOT"
 description = "Custom ProjectKorra items"
+base.archivesName = gradle.extra["projectName"].toString()
 
-ext.set("projectName", gradle.extra["projectName"].toString())
+ext.set("projectName", base.archivesName)
 maven.pom {
     name = gradle.extra["projectName"].toString()
 }
