@@ -16,7 +16,7 @@ import com.projectkorra.items.Messages;
 import com.projectkorra.items.attribute.Action;
 import com.projectkorra.items.attribute.Attribute;
 import com.projectkorra.items.attribute.AttributeList;
-import com.projectkorra.items.attribute.AttributeListener;
+import com.projectkorra.items.listeners.AttributeListener;
 import com.projectkorra.items.customs.PKItem;
 import com.projectkorra.projectkorra.Element;
 

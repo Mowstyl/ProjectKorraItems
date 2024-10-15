@@ -83,7 +83,7 @@ public abstract class PKICommand implements SubCommand {
 	 * @param size The length of the arguments list
 	 * @param min The minimum acceptable number of arguments
 	 * @param max The maximum acceptable number of arguments
-	 * @return True if min < size < max, false otherwise
+	 * @return True if min &lt; size &lt; max, false otherwise
 	 */
 	protected boolean correctLength(CommandSender sender, int size, int min, int max) {
 		if (size < min || size > max) {

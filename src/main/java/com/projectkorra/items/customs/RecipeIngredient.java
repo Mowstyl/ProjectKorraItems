@@ -6,7 +6,6 @@ import com.projectkorra.items.ProjectKorraItems;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
 public class RecipeIngredient {
@@ -96,7 +95,7 @@ public class RecipeIngredient {
 			if (material == Material.POTION && potionType != null) {
 				PotionMeta pmeta = (PotionMeta) istack.getItemMeta();
 				if (pmeta != null) {
-					pmeta.setBasePotionData(new PotionData(potionType));
+					pmeta.setBasePotionType(potionType);
 					istack.setItemMeta(pmeta);
 				}
 			}

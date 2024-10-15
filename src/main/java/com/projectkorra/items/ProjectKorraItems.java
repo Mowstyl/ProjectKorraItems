@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
+import com.projectkorra.items.listeners.PKIListener;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.projectkorra.items.abilityupdater.AbilityUpdater;
-import com.projectkorra.items.attribute.AttributeListener;
+import com.projectkorra.items.listeners.AttributeListener;
 import com.projectkorra.items.command.BaseCommand;
 import com.projectkorra.items.command.EquipCommand;
 import com.projectkorra.items.command.GiveCommand;
@@ -21,6 +22,7 @@ import com.projectkorra.items.customs.PKIDisplay;
 public class ProjectKorraItems extends JavaPlugin {
 	public static ProjectKorraItems plugin;
 	public static Logger log;
+	private AttributeListener attrListener;
 
 	@Override
 	public void onEnable() {
@@ -45,7 +47,8 @@ public class ProjectKorraItems extends JavaPlugin {
 		//
 		
 		pm.registerEvents(new PKIListener(), this);
-		pm.registerEvents(new AttributeListener(), this);
+		attrListener = new AttributeListener(this);
+		pm.registerEvents(attrListener, this);
 		pm.registerEvents(new AbilityUpdater(), this);
 
 		// ArmorEquipEvent.registerListener(this);
@@ -63,6 +66,7 @@ public class ProjectKorraItems extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
+		attrListener.stop();
 		PluginDescriptionFile pdfFile = this.getDescription();
 		log.info(pdfFile.getName() + " Has Been Disabled!");
 		

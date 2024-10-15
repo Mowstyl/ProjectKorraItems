@@ -60,7 +60,7 @@ public class PKItem {
 	}
 
 	public void updateName(String s) {
-		if (s == null || s.length() == 0 || s.contains(" ")) {
+		if (s == null || s.isEmpty() || s.contains(" ")) {
 			valid = false;
 			ProjectKorraItems.log.info(Messages.BAD_NAME + ": " + toString());
 			if (s != null)
@@ -71,7 +71,7 @@ public class PKItem {
 	}
 
 	public void updateDisplayName(String s) {
-		if (s == null || s.length() == 0) {
+		if (s == null || s.isEmpty()) {
 			valid = false;
 			ProjectKorraItems.log.info(Messages.BAD_DNAME + ": " + toString());
 		} else {
@@ -82,7 +82,7 @@ public class PKItem {
 	}
 
 	public void updateLore(String s) {
-		if (s == null || s.length() == 0) {
+		if (s == null || s.isEmpty()) {
 			valid = false;
 			ProjectKorraItems.log.info(Messages.BAD_LORE + ": " + toString());
 		} else {
@@ -93,7 +93,7 @@ public class PKItem {
 	}
 
 	public void updateMaterial(String s) {
-		if (s == null || s.length() == 0) {
+		if (s == null || s.isEmpty()) {
 			valid = false;
 			ProjectKorraItems.log.info(Messages.BAD_MATERIAL + "(95): " + toString());
 		} else {
@@ -144,13 +144,13 @@ public class PKItem {
 	 * example: <i>UnshapedRecipe: WOOL, WOOL:3:14, WOOL</i> Recipe ingredients
 	 * can be both Material and other CustomItems.
 	 * 
-	 * @param s
-	 * @param customItemNames
+	 * @param recipeStr the string containing the recipe
+	 * @param customItemNames the set with all custom item names
 	 */
-	public void updateRecipe(String s, Set<String> customItemNames) {
+	public void updateRecipe(String recipeStr, Set<String> customItemNames) {
 		try {
-			s = s.replaceAll(" ", "");
-			String[] commas = s.split(",");
+			recipeStr = recipeStr.replaceAll(" ", "");
+			String[] commas = recipeStr.split(",");
 
 			for (String comma : commas) {
 				String[] colons = comma.split(":");
@@ -188,7 +188,7 @@ public class PKItem {
 			}
 		}
 		catch (Exception e) {
-			ProjectKorraItems.log.info(Messages.BAD_RECIPE + ": " + s);
+			ProjectKorraItems.log.info(Messages.BAD_RECIPE + ": " + recipeStr);
 			valid = false;
 		}
 	}
@@ -201,9 +201,9 @@ public class PKItem {
 			ProjectKorraItems.log.info(Messages.BAD_ITEM + ": " + toString());
 		else if (items.containsKey(name.toLowerCase()))
 			ProjectKorraItems.log.info(Messages.DUPLICATE_ITEM + ": " + toString());
-		else if (name.length() == 0)
+		else if (name.isEmpty())
 			ProjectKorraItems.log.info(Messages.BAD_NAME + ": " + toString());
-		else if (displayName.length() == 0)
+		else if (displayName.isEmpty())
 			ProjectKorraItems.log.info(Messages.BAD_DNAME + ": " + toString());
 		else if ((!isOraxen && material == null) || (isOraxen && oraxenId == null)) {
 			ProjectKorraItems.log.info(Messages.BAD_MATERIAL + "(219): " + toString());
@@ -235,11 +235,11 @@ public class PKItem {
 			for (Attribute attr : attributes) {
 				try {
 					if (attr.getName().equalsIgnoreCase("Charges"))
-						tempLore.add(AttributeList.CHARGES_STR + Integer.parseInt(attr.getValues().get(0)));
+						tempLore.add(AttributeList.CHARGES_STR + Integer.parseInt(attr.getValues().getFirst()));
 					else if (attr.getName().equalsIgnoreCase("ClickCharges"))
-						tempLore.add(AttributeList.CLICK_CHARGES_STR + Integer.parseInt(attr.getValues().get(0)));
+						tempLore.add(AttributeList.CLICK_CHARGES_STR + Integer.parseInt(attr.getValues().getFirst()));
 					else if (attr.getName().equalsIgnoreCase("SneakCharges"))
-						tempLore.add(AttributeList.SNEAK_CHARGES_STR + Integer.parseInt(attr.getValues().get(0)));
+						tempLore.add(AttributeList.SNEAK_CHARGES_STR + Integer.parseInt(attr.getValues().getFirst()));
 				} catch (Exception ignored) { }
 
 				try {
@@ -266,7 +266,6 @@ public class PKItem {
 	/**
 	 * Checks if a CustomItem has a specific attribute, and also that the
 	 * attribute has a boolean value of true.
-	 * 
 	 * If the value is false, or it was not found, then this returns false.
 	 * 
 	 * @param attrib the name of the attribute
@@ -407,16 +406,21 @@ public class PKItem {
 	}
 
 	public static PKItem getCustomItem(ItemStack istack) {
-		if (istack == null || istack.getItemMeta() == null)
-			return null;
-
-		PersistentDataContainer itemDC = istack.getItemMeta().getPersistentDataContainer();
-		String name = itemDC.get(PKI_KEY, PersistentDataType.STRING);
+		String name = getIdByItem(istack);
 
 		if (name == null)
 			return null;
 
 		return getCustomItem(name);
+	}
+
+	public static String getIdByItem(ItemStack istack) {
+		if (istack == null || istack.getItemMeta() == null)
+			return null;
+
+		PersistentDataContainer itemDC = istack.getItemMeta().getPersistentDataContainer();
+
+        return itemDC.get(PKI_KEY, PersistentDataType.STRING);
 	}
 
 	public static PKItem getCustomItem(String itemName) {

@@ -1,7 +1,8 @@
-package com.projectkorra.items;
+package com.projectkorra.items.listeners;
 
 import java.util.*;
 
+import com.projectkorra.items.ProjectKorraItems;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;

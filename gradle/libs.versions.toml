@@ -1,0 +1,19 @@
+[plugins]
+shadowPlugin = { id = "com.gradleup.shadow", version.ref = "shadowGradlePlugin" }
+generatePOMPlugin = { id = "ru.vyarus.java-lib", version.ref = "generatePOMGradlePlugin" }
+spotBugsPlugin = { id = "com.github.spotbugs", version.ref = "spotBugsGradlePlugin" }
+userdevPlugin = { id = "io.papermc.paperweight.userdev", version.ref = "userdevGradlePlugin" }
+
+[versions]
+shadowGradlePlugin = "8.3.0"
+generatePOMGradlePlugin = "3.0.0"
+spotBugsGradlePlugin = "6.0.20"
+userdevGradlePlugin = "1.7.2"
+bukkitAPI = "1.21.1-R0.1-SNAPSHOT"
+oraxen = "1.182.0"
+projectKorra = "master-SNAPSHOT"
+
+[libraries]
+papermc-paperapi = { group = "io.papermc.paper", name = "paper-api", version.ref = "bukkitAPI" }
+thorgal-oraxen = { group = "io.th0rgal", name = "oraxen", version.ref = "oraxen" }
+projectkorra-core = { group = "com.github.Mowstyl.ProjectKorra", name = "core", version.ref = "projectKorra" }

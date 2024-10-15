@@ -1,7 +1,8 @@
-name: ${project.name}
-author: ProjectKorraItems
-version: ${project.version}
-main: ${project.groupId}.${project.artifactId}.ProjectKorraItems
+name: ${rootProject.projectName}
+main: ${rootProject.group}.${rootProject.name}.${rootProject.projectName}
+version: ${rootProject.version}
+description: ${rootProject.description}
+author: [ProjectKorraItems, Mowstyl]
 depend: [ProjectKorra, Oraxen]
 api-version: 1.13
 
