@@ -4,7 +4,7 @@ version: ${rootProject.version}
 description: ${rootProject.description}
 author: [ProjectKorraItems, Mowstyl]
 depend: [ProjectKorra, Oraxen]
-api-version: 1.13
+api-version: "1.13"
 
 permissions:
   bendingitems.admin:

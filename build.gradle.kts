@@ -14,7 +14,7 @@ version = "2.0.0-SNAPSHOT"
 description = "Custom ProjectKorra items"
 base.archivesName = gradle.extra["projectName"].toString()
 
-ext.set("projectName", base.archivesName)
+ext.set("projectName", gradle.extra["projectName"].toString())
 maven.pom {
     name = gradle.extra["projectName"].toString()
 }
@@ -66,19 +66,23 @@ dependencies {
     }
 }
 
-tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-}
-
-tasks.withType<Javadoc> {
-    options.encoding = "UTF-8"
-}
-
 tasks {
+    compileJava {
+        options.encoding = Charsets.UTF_8.name()
+    }
+
+    javadoc {
+        options.encoding = Charsets.UTF_8.name()
+    }
+
     processResources {
         filesMatching("**/plugin.yml") {
             expand( project.properties )
         }
+    }
+
+    shadowJar{
+
     }
 
     spotbugsMain {

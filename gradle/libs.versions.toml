@@ -5,12 +5,13 @@ spotBugsPlugin = { id = "com.github.spotbugs", version.ref = "spotBugsGradlePlug
 userdevPlugin = { id = "io.papermc.paperweight.userdev", version.ref = "userdevGradlePlugin" }
 
 [versions]
-shadowGradlePlugin = "8.3.0"
+shadowGradlePlugin = "9.0.0-beta6"
 generatePOMGradlePlugin = "3.0.0"
-spotBugsGradlePlugin = "6.0.20"
-userdevGradlePlugin = "1.7.2"
-bukkitAPI = "1.21.1-R0.1-SNAPSHOT"
-oraxen = "1.182.0"
+spotBugsGradlePlugin = "6.1.2"
+userdevGradlePlugin = "2.0.0-beta.14"
+
+bukkitAPI = "1.21.4-R0.1-SNAPSHOT"
+oraxen = "1.188.0"
 projectKorra = "master-SNAPSHOT"
 
 [libraries]
