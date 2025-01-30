@@ -24,7 +24,7 @@ public class GiveCommand extends PKICommand {
 				sender.sendMessage(Messages.NO_PERM);
 				return;
 			}
-			if (args.size() == 0) {
+			if (args.isEmpty()) {
 				sender.sendMessage(ChatColor.YELLOW + " ---- " + ChatColor.GOLD + "Item Names " + ChatColor.YELLOW + "----");
 				for (PKItem citem : PKItem.itemList)
 					sender.sendMessage(ChatColor.YELLOW + citem.getName());
@@ -34,41 +34,38 @@ public class GiveCommand extends PKICommand {
 				sender.sendMessage(Messages.PLAYER_ONLY);
 				return;
 			}
+			if (args.isEmpty())
+				return;
 
 			Player player = (Player)sender;
-			PKItem ci = null;
-			ItemStack i = null;
-			int q = 1;
+			PKItem ci = PKItem.getCustomItem(args.getFirst());
 
-			if (args.size() >= 1) {
-				ci = PKItem.getCustomItem(args.get(0));
+			if (ci == null) {
+				sender.sendMessage(Messages.ITEM_NOT_FOUND);
+				return;
+			}
+			ItemStack i = ci.generateItem();
 
-				if (ci == null) {
-					sender.sendMessage(Messages.ITEM_NOT_FOUND);
+			if (args.size() >= 2) {
+				int q;
+				try {
+					q = Integer.parseInt(args.get(1));
+				} catch (Exception e) {
+					sender.sendMessage(Messages.NOT_INT);
 					return;
 				}
-				i = ci.generateItem();
+				i.setAmount(q);
 
-				if (args.size() >= 2) {
-					try {
-						q = Integer.parseInt(args.get(1));
-					} catch (Exception e) {
-						sender.sendMessage(Messages.NOT_INT);
+				if (args.size() == 3) {
+					Player target = ProjectKorraItems.plugin.getServer().getPlayer(args.get(2));
+
+					if (target == null) {
+						sender.sendMessage(Messages.INVALID_PLAYER);
 						return;
 					}
-					i.setAmount(q);
 
-					if (args.size() == 3) {
-						Player target = ProjectKorraItems.plugin.getServer().getPlayer(args.get(2));
-
-						if (target == null) {
-							sender.sendMessage(Messages.INVALID_PLAYER);
-							return;
-						}
-
-						target.getInventory().addItem(i);
-						return;
-					}
+					target.getInventory().addItem(i);
+					return;
 				}
 			}
 			player.getInventory().addItem(i);

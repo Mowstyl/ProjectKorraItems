@@ -11,7 +11,6 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -220,11 +219,10 @@ public class PKItem {
 			istack = new ItemStack(material, quantity);
 		}
 		else {
-			istack = OraxenItems.getItemById(oraxenId).setAmount(1).build();
+			istack = OraxenItems.getItemById(oraxenId).setAmount(1).build().clone();
 			istack.setAmount(1);
 		}
-		ItemMeta meta = istack.getItemMeta();
-		if (meta != null) {
+		istack.editMeta((meta) -> {
 			meta.setDisplayName(displayName);
 			List<String> tempLore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 			if (tempLore == null) {
@@ -246,7 +244,6 @@ public class PKItem {
 					if (attr.getName().equalsIgnoreCase("LeatherColor")) {
 						LeatherArmorMeta lmeta = (LeatherArmorMeta) meta;
 						lmeta.setColor(Color.fromRGB(Integer.parseInt(attr.getValues().get(0).trim()), Integer.parseInt(attr.getValues().get(1).trim()), Integer.parseInt(attr.getValues().get(2).trim())));
-						meta = lmeta;
 					}
 				} catch (Exception ignored) { }
 			}
@@ -257,8 +254,7 @@ public class PKItem {
 			itemDC.set(PKI_KEY, PersistentDataType.STRING, name);
 
 			meta.setEnchantmentGlintOverride(glow);
-			istack.setItemMeta(meta);
-		}
+		});
 
 		return istack;
 	}

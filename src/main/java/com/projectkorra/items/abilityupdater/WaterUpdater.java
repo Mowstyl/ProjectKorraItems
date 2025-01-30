@@ -147,7 +147,7 @@ public class WaterUpdater {
 				abil.setRadius(abil.getRadius() + abil.getRadius() * attribs.get("OctopusFormRadius") / 100.0);
 			
 			if (attribs.containsKey("OctopusFormRange"))
-				abil.setRange((int) (abil.getRange() + abil.getRange() * attribs.get("OctopusFormRange") / 100.0));
+				abil.setAttackRange((int) (abil.getAttackRange() + abil.getAttackRange() * attribs.get("OctopusFormRange") / 100.0));
 			
 			//if (attribs.containsKey("OctopusFormStartAngle"))
 			//	abil.setStartAngle(abil.getStartAngle() + abil.getStartAngle() * attribs.get("OctopusFormStartAngle") / 100.0);
