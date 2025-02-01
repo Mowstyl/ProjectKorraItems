@@ -1,6 +1,6 @@
 package com.projectkorra.items.customs;
 
-import com.projectkorra.items.attribute.Attribute;
+import com.projectkorra.items.attribute.PKIAttribute;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -103,7 +103,7 @@ public class PKIDisplay {
 			if (meta != null) {
 				if (showStats) {
 					List<String> lore = new ArrayList<>();
-					for (Attribute att : citem.getAttributes()) {
+					for (PKIAttribute att : citem.getAttributes().values()) {
 						if (att.getValues().toString().length() < 40)
 							lore.add(att.getName() + ":" + att.getValues());
 						else
@@ -116,7 +116,7 @@ public class PKIDisplay {
 						lore = new ArrayList<>();
 
 					String s;
-					if (citem.getRecipe().size() == 0)
+					if (citem.getRecipe().isEmpty())
 						s = ChatColor.RED + "Uncraftable";
 					else if (citem.isUnshapedRecipe())
 						s = ChatColor.GREEN + "Craftable (unshaped)";

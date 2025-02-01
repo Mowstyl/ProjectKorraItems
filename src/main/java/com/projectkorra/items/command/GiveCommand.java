@@ -57,7 +57,7 @@ public class GiveCommand extends PKICommand {
 				i.setAmount(q);
 
 				if (args.size() == 3) {
-					Player target = ProjectKorraItems.plugin.getServer().getPlayer(args.get(2));
+					Player target = ProjectKorraItems.getInstance().getServer().getPlayer(args.get(2));
 
 					if (target == null) {
 						sender.sendMessage(Messages.INVALID_PLAYER);

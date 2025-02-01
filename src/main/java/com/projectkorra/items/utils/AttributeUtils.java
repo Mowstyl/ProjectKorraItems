@@ -1,10 +1,9 @@
 package com.projectkorra.items.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -14,13 +13,15 @@ import org.bukkit.potion.PotionEffectType;
 
 import com.projectkorra.items.Messages;
 import com.projectkorra.items.attribute.Action;
-import com.projectkorra.items.attribute.Attribute;
+import com.projectkorra.items.attribute.PKIAttribute;
 import com.projectkorra.items.attribute.AttributeList;
-import com.projectkorra.items.listeners.AttributeListener;
 import com.projectkorra.items.customs.PKItem;
-import com.projectkorra.projectkorra.Element;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class AttributeUtils {
+	private static final Map<UUID, Integer> lastCheck = new ConcurrentHashMap<>();
+	private static final Map<UUID, List<PKItem>> currentPKItems = new ConcurrentHashMap<>();
 
 	/**
 	 * Generates a map containing all of the attributes on the players armor and
@@ -30,116 +31,36 @@ public class AttributeUtils {
 	 * @param player the player to create the effects of
 	 * @return a map containing attribute effects
 	 */
-	public static Map<String, Double> getSimplePlayerAttributeMap(Player player) {
+	public static Collection<PKItem> getActivePKitems(Player player) {
+		UUID uuid = player.getUniqueId();
+		int lastTick = lastCheck.getOrDefault(uuid, -1);
+		int currentTick = Bukkit.getCurrentTick();
+		if (lastTick != -1 && currentTick == lastTick)
+			return currentPKItems.get(uuid);
 		List<ItemStack> equipment = ItemUtils.getPlayerValidEquipment(player);
-		Map<String, Double> attribMap = new ConcurrentHashMap<>();
-		List<Attribute> totalAttribs = new ArrayList<>();
-
-		/* Handle any potion style bending effects that the player might have */
-		if (AttributeListener.currentBendingEffects.containsKey(player.getName())) {
-			Map<String, Attribute> effects = AttributeListener.currentBendingEffects.get(player.getName());
-			for (Attribute effect : effects.values()) {
-				if (System.currentTimeMillis() - effect.getTime() < effect.getDuration()) {
-					totalAttribs.add(effect);
-				}
-			}
-		}
-
-		/* Handle any armor bending effects */
-		for (ItemStack istack : equipment) {
-			PKItem citem = PKItem.getCustomItem(istack);
-			if (citem == null)
-				continue;
-			totalAttribs.addAll(citem.getAttributes());
-		}
-
-		/* Handles the "Air", "Water", "Earth", and "Fire" stats */
-		List<Attribute> fullElementAttribs = new ArrayList<>();
-		for (Attribute attr : totalAttribs) {
-			fullElementAttribs.addAll(getFullElementAttributes(attr));
-		}
-		totalAttribs.addAll(fullElementAttribs);
-
-		for (Attribute attr : totalAttribs) {
-			if (attr.getValues().size() != 1)
-				continue;
-
-			double val = 0;
-			if (attribMap.containsKey(attr.getName()))
-				val = attribMap.get(attr.getName());
-			val += attr.getValueAsDouble();
-			attribMap.put(attr.getName(), val);
-		}
-		return attribMap;
+		List<PKItem> items = equipment.stream().map(PKItem::getCustomItem).filter(Objects::nonNull).toList();
+		currentPKItems.put(uuid, items);
+		lastCheck.put(uuid, currentTick);
+		return items;
 	}
 
 	/**
 	 * Takes an attribute stat and tries to split its values into a list of
 	 * PotionEffects.
 	 * 
-	 * @param attr the attribute to split
+	 * @param potionData the attribute to split
 	 * @return a list of the new PotionEffects
 	 */
-	public static List<PotionEffect> parsePotionEffects(Attribute attr) {
-		List<PotionEffect> effects = new ArrayList<>();
-		if (attr.getValues() == null)
-			return effects;
-
-		for (String val : attr.getValues()) {
-			String[] colSplit = val.split(":");
-			PotionEffectType type = PotionEffectType.getByName(colSplit[0].trim());
-			if (type != null) {
-				int strength = Integer.parseInt(colSplit[1].trim());
-				double duration = Double.parseDouble(colSplit[2].trim());
-				PotionEffect pot = new PotionEffect(type, (int) (duration * 20), strength - 1);
-				effects.add(pot);
-			}
+	public static @Nullable PotionEffect parsePotionEffect(@NonNull String potionData) {
+		PotionEffect effect = null;
+		String[] colSplit = potionData.split(":");
+		PotionEffectType type = PotionEffectType.getByName(colSplit[0].trim());
+		if (type != null) {
+			int strength = Integer.parseInt(colSplit[1].trim());
+			double duration = Double.parseDouble(colSplit[2].trim());
+			effect = new PotionEffect(type, (int) (duration * 20), strength - 1);
 		}
-		return effects;
-	}
-
-	/**
-	 * This method will handle logging the bad effects for both itself and the
-	 * parsePotionEffects. If there was a mistake in the effect it would not
-	 * pass the PotionEffectType.getByName check, and it would break on the
-	 * parsing.
-	 * 
-	 * @param attr the attribute containing a list of bending effects as values
-	 * @return a list of new attributes representing the bending effects
-	 */
-	public static List<Attribute> parseBendingEffects(Attribute attr) {
-		List<Attribute> effects = new ArrayList<>();
-		if (attr.getValues() == null)
-			return effects;
-
-		for (String val : attr.getValues()) {
-			String[] colSplit = val.split(":");
-			if (colSplit.length < 3) {
-				Messages.logTimedMessage(Messages.MISSING_EFFECT_VALUES + ": " + val, Messages.LOG_DELAY);
-				continue;
-			}
-			try {
-				String name = colSplit[0].trim();
-
-				// Make sure its not a potion
-				PotionEffectType type = PotionEffectType.getByName(name);
-				if (type != null)
-					continue;
-
-				final String modifier = colSplit[1].trim();
-				double duration = Double.parseDouble(colSplit[2].trim());
-				Attribute newAttr = new Attribute(Attribute.getAttribute(name));
-				List<String> vals = new ArrayList<>();
-				vals.add(modifier);
-				newAttr.setValues(vals);
-				newAttr.setDuration(duration * 1000);
-				effects.add(newAttr);
-			}
-			catch (Exception e) {
-				Messages.logTimedMessage(Messages.BAD_VALUE + ": " + val, Messages.LOG_DELAY);
-			}
-		}
-		return effects;
+		return effect;
 	}
 
 	/**
@@ -252,47 +173,6 @@ public class AttributeUtils {
 	}
 
 	/**
-	 * Given an attribute with a name of "Air", "Water", "Earth", or "Fire" this
-	 * method will return a list of all the attributes that correspond to that
-	 * specific element. All of the attributes will have a benefit corresponding
-	 * to the value of the attribute.
-	 * 
-	 * @param attr an attribute with an element as a name
-	 * @return a list of attributes for that element
-	 */
-	public static List<Attribute> getFullElementAttributes(Attribute attr) {
-		return getFullElementAttributes(attr.getName(), attr.getValueAsDouble());
-	}
-
-	/**
-	 * Given the String "Air", "Water", "Earth", or "Fire" this method will
-	 * return a list of all the attributes that correspond to that specific
-	 * element. All of the attributes will have a benefit of value.
-	 * 
-	 * @param name the name of the element
-	 * @param value the amount of benefit to give
-	 * @return a list of attributes for that element
-	 */
-	public static List<Attribute> getFullElementAttributes(String name, double value) {
-		List<Attribute> lst = new ArrayList<>();
-		if (name == null) {
-			return lst;
-		}
-
-		Element elem = Element.getElement(name);
-		if (elem != null) {
-			for (Attribute listAttr : AttributeList.ATTRIBUTES) {
-				if (listAttr.getElement() == elem) {
-					Attribute newAttr = new Attribute(listAttr);
-					newAttr.setValues(value * newAttr.getBenefit());
-					lst.add(newAttr);
-				}
-			}
-		}
-		return lst;
-	}
-
-	/**
 	 * Determines if a player is allowed to use a specific CustomItem, depending
 	 * on if the CustomItem has the "RequireElement" Attribute. If the item has
 	 * the Attribute then it compares the elements to the player's element.
@@ -305,10 +185,11 @@ public class AttributeUtils {
 		if (player == null || citem == null) {
 			return false;
 		}
-		Attribute requireElem = citem.getAttribute("RequireElement");
+		PKIAttribute requireElem = citem.getAttribute("RequireElement");
 		if (requireElem != null) {
 			boolean allowed = false;
-			for (String val : requireElem.getValues()) {
+			for (Object rawVal : requireElem.getValues()) {
+				String val = (String) rawVal;
 				try {
 					if (ElementUtils.hasElement(player, val)) {
 						allowed = true;
@@ -339,7 +220,7 @@ public class AttributeUtils {
 		if (player == null || citem == null) {
 			return false;
 		}
-		Attribute require = citem.getAttribute("RequireWorld");
+		PKIAttribute require = citem.getAttribute("RequireWorld");
 		if (require != null) {
 			return require.getValues().contains(player.getWorld().getName());
 		}
@@ -360,12 +241,12 @@ public class AttributeUtils {
 		if (player == null || citem == null) {
 			return false;
 		}
-		Attribute require = citem.getAttribute("RequirePermission");
+		PKIAttribute require = citem.getAttribute("RequirePermission");
 		if (require != null) {
-			for (String perm : require.getValues()) {
-				if (player.hasPermission(perm)) {
+			for (Object rawPerm : require.getValues()) {
+				String perm = (String) rawPerm;
+				if (player.hasPermission(perm))
 					return true;
-				}
 			}
 			return false;
 		}

@@ -2,9 +2,10 @@ package com.projectkorra.items.customs;
 
 import com.projectkorra.items.Messages;
 import com.projectkorra.items.ProjectKorraItems;
-import com.projectkorra.items.attribute.Attribute;
+import com.projectkorra.items.attribute.PKIAttribute;
 import com.projectkorra.items.attribute.AttributeList;
 
+import com.projectkorra.projectkorra.attribute.AttributeModification;
 import io.th0rgal.oraxen.api.OraxenItems;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -15,17 +16,15 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PKItem {
-	public static Map<String, PKItem> items = new ConcurrentHashMap<>();
+	private static final Map<String, PKItem> items = new ConcurrentHashMap<>();
 	public static List<PKItem> itemList = new ArrayList<>();
-	public static NamespacedKey PKI_KEY = new NamespacedKey(ProjectKorraItems.plugin, "name");
+	public static NamespacedKey PKI_KEY = new NamespacedKey(ProjectKorraItems.getInstance(), "name");
 
 	private String name;
 	private String displayName;
@@ -40,7 +39,8 @@ public class PKItem {
 	private boolean valid;
 	private boolean alreadyFinal;
 	private Boolean glow;
-	private List<Attribute> attributes;
+	private Map<String, PKIAttribute> attributes;
+	private final Map<String, Map<String, AttributeModification>> modifiers = new ConcurrentHashMap<>();
 
 	public PKItem() {
 		name = "";
@@ -55,13 +55,13 @@ public class PKItem {
 		valid = true;
 		unshapedRecipe = true;
 		glow = null;
-		attributes = new ArrayList<>();
+		attributes = new ConcurrentHashMap<>();
 	}
 
 	public void updateName(String s) {
 		if (s == null || s.isEmpty() || s.contains(" ")) {
 			valid = false;
-			ProjectKorraItems.log.info(Messages.BAD_NAME + ": " + toString());
+			ProjectKorraItems.info(Messages.BAD_NAME + ": " + toString());
 			if (s != null)
 				name = s;
 		} else {
@@ -72,7 +72,7 @@ public class PKItem {
 	public void updateDisplayName(String s) {
 		if (s == null || s.isEmpty()) {
 			valid = false;
-			ProjectKorraItems.log.info(Messages.BAD_DNAME + ": " + toString());
+			ProjectKorraItems.info(Messages.BAD_DNAME + ": " + toString());
 		} else {
 			if (!s.contains("<&"))
 				s = "<&f>" + s;
@@ -83,7 +83,7 @@ public class PKItem {
 	public void updateLore(String s) {
 		if (s == null || s.isEmpty()) {
 			valid = false;
-			ProjectKorraItems.log.info(Messages.BAD_LORE + ": " + toString());
+			ProjectKorraItems.info(Messages.BAD_LORE + ": " + toString());
 		} else {
 			String[] lines = s.split("<n>");
 			for (String line : lines)
@@ -94,7 +94,7 @@ public class PKItem {
 	public void updateMaterial(String s) {
 		if (s == null || s.isEmpty()) {
 			valid = false;
-			ProjectKorraItems.log.info(Messages.BAD_MATERIAL + "(95): " + toString());
+			ProjectKorraItems.info(Messages.BAD_MATERIAL + "(95): " + toString());
 		} else {
 			if (s.toLowerCase().startsWith("oraxen:")) {
 				s = s.split(":")[1];
@@ -104,14 +104,14 @@ public class PKItem {
 				}
 				else {
 					valid = false;
-					ProjectKorraItems.log.info(Messages.BAD_MATERIAL + "(105): oraxen:" + s);
+					ProjectKorraItems.info(Messages.BAD_MATERIAL + "(105): oraxen:" + s);
 				}
 			}
 			else {
 				material = Material.getMaterial(s);
 				if (material == null) {
 					valid = false;
-					ProjectKorraItems.log.info(Messages.BAD_MATERIAL + "(112): " + s);
+					ProjectKorraItems.info(Messages.BAD_MATERIAL + "(112): " + s);
 				}
 			}
 		}
@@ -178,7 +178,7 @@ public class PKItem {
 				} else if (customItemNames.contains(colons[0])) {
 					recipe.add(new RecipeIngredient(colons[0], quantity, potionType));
 				} else {
-					ProjectKorraItems.log.info(Messages.BAD_RECIPE_MAT + ": " + colons[0]);
+					ProjectKorraItems.info(Messages.BAD_RECIPE_MAT + ": " + colons[0]);
 					valid = false;
 				}
 			}
@@ -187,7 +187,7 @@ public class PKItem {
 			}
 		}
 		catch (Exception e) {
-			ProjectKorraItems.log.info(Messages.BAD_RECIPE + ": " + recipeStr);
+			ProjectKorraItems.info(Messages.BAD_RECIPE + ": " + recipeStr);
 			valid = false;
 		}
 	}
@@ -197,15 +197,15 @@ public class PKItem {
 			return;
 		alreadyFinal = true;
 		if (!valid)
-			ProjectKorraItems.log.info(Messages.BAD_ITEM + ": " + toString());
+			ProjectKorraItems.info(Messages.BAD_ITEM + ": " + this);
 		else if (items.containsKey(name.toLowerCase()))
-			ProjectKorraItems.log.info(Messages.DUPLICATE_ITEM + ": " + toString());
+			ProjectKorraItems.info(Messages.DUPLICATE_ITEM + ": " + this);
 		else if (name.isEmpty())
-			ProjectKorraItems.log.info(Messages.BAD_NAME + ": " + toString());
+			ProjectKorraItems.info(Messages.BAD_NAME + ": " + this);
 		else if (displayName.isEmpty())
-			ProjectKorraItems.log.info(Messages.BAD_DNAME + ": " + toString());
+			ProjectKorraItems.info(Messages.BAD_DNAME + ": " + this);
 		else if ((!isOraxen && material == null) || (isOraxen && oraxenId == null)) {
-			ProjectKorraItems.log.info(Messages.BAD_MATERIAL + "(219): " + toString());
+			ProjectKorraItems.info(Messages.BAD_MATERIAL + "(219): " + this);
 		}
 		else {
 			items.put(name.toLowerCase(), this);
@@ -230,20 +230,22 @@ public class PKItem {
 			}
 			tempLore.addAll(lore);
 
-			for (Attribute attr : attributes) {
+			for (Map.Entry<String, PKIAttribute> entry : attributes.entrySet()) {
+				String name = entry.getKey();
+				PKIAttribute attr = entry.getValue();
 				try {
-					if (attr.getName().equalsIgnoreCase("Charges"))
-						tempLore.add(AttributeList.CHARGES_STR + Integer.parseInt(attr.getValues().getFirst()));
-					else if (attr.getName().equalsIgnoreCase("ClickCharges"))
-						tempLore.add(AttributeList.CLICK_CHARGES_STR + Integer.parseInt(attr.getValues().getFirst()));
-					else if (attr.getName().equalsIgnoreCase("SneakCharges"))
-						tempLore.add(AttributeList.SNEAK_CHARGES_STR + Integer.parseInt(attr.getValues().getFirst()));
+					if (name.equalsIgnoreCase("Charges"))
+						tempLore.add(AttributeList.CHARGES_STR + attr.getValues().getFirst());
+					else if (name.equalsIgnoreCase("ClickCharges"))
+						tempLore.add(AttributeList.CLICK_CHARGES_STR + attr.getValues().getFirst());
+					else if (name.equalsIgnoreCase("SneakCharges"))
+						tempLore.add(AttributeList.SNEAK_CHARGES_STR + attr.getValues().getFirst());
 				} catch (Exception ignored) { }
 
 				try {
-					if (attr.getName().equalsIgnoreCase("LeatherColor")) {
+					if (name.equalsIgnoreCase("LeatherColor")) {
 						LeatherArmorMeta lmeta = (LeatherArmorMeta) meta;
-						lmeta.setColor(Color.fromRGB(Integer.parseInt(attr.getValues().get(0).trim()), Integer.parseInt(attr.getValues().get(1).trim()), Integer.parseInt(attr.getValues().get(2).trim())));
+						lmeta.setColor(Color.fromRGB((int) attr.getValues().get(0), (int) attr.getValues().get(1), (int) attr.getValues().get(2)));
 					}
 				} catch (Exception ignored) { }
 			}
@@ -268,20 +270,14 @@ public class PKItem {
 	 * @return true if the attribute was found and true
 	 */
 	public boolean getBooleanAttributeValue(String attrib) {
-		for (Attribute attr : attributes) {
-			if (attr.getBooleanValue(attrib)) {
-				return true;
-			}
-		}
+		PKIAttribute attr = attributes.get(attrib);
+		if (attr != null)
+			return (boolean) attr.getValues().getFirst();
 		return false;
 	}
 
 	public static Map<String, PKItem> getItems() {
 		return items;
-	}
-
-	public static void setItems(Map<String, PKItem> items) {
-		PKItem.items = items;
 	}
 
 	public String getName() {
@@ -312,7 +308,21 @@ public class PKItem {
 		return material;
 	}
 
-	public List<Attribute> getAttributes() {
+	public void addAttribute(PKIAttribute attribute) {
+		attributes.put(attribute.getName(), attribute);
+	}
+
+	public @NonNull Map<String, AttributeModification> getModifiers(@NonNull String ability) {
+		return modifiers.computeIfAbsent(ability, k -> new ConcurrentHashMap<>());
+	}
+
+	/**
+	 * Given an attribute name, returns the attribute if this item has it, else
+	 * returns null.
+	 *
+	 * @return an attribute or null
+	 */
+	public Map<String, PKIAttribute> getAttributes() {
 		return attributes;
 	}
 
@@ -323,17 +333,8 @@ public class PKItem {
 	 * @param attrName the name of the attribute
 	 * @return an attribute or null
 	 */
-	public Attribute getAttribute(String attrName) {
-		for (Attribute attr : attributes) {
-			if (attr.getName().equalsIgnoreCase(attrName)) {
-				return attr;
-			}
-		}
-		return null;
-	}
-
-	public void setAttributes(List<Attribute> attributes) {
-		this.attributes = attributes;
+	public PKIAttribute getAttribute(String attrName) {
+		return attributes.get(attrName);
 	}
 
 	/*

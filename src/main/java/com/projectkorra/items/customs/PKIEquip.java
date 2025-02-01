@@ -3,6 +3,7 @@ package com.projectkorra.items.customs;
 import com.projectkorra.items.Messages;
 import com.projectkorra.items.ProjectKorraItems;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -94,7 +95,7 @@ public class PKIEquip {
 				public void run() {
 					fitemEq.item = foundItem;
 				}
-			}.runTaskLater(ProjectKorraItems.plugin, 1L);
+			}.runTaskLater(ProjectKorraItems.getInstance(), 1L);
 
 			inv.setItem(newSlot, foundItem);
 			inv.setItem(foundSlot, new ItemStack(Material.AIR));
@@ -104,11 +105,7 @@ public class PKIEquip {
 
 			final ItemStack prevItem = inv.getItem(prevSlot);
 			final PKIEquip fitemEq = itemEq;
-			new BukkitRunnable() {
-				public void run() {
-					fitemEq.item = prevItem;
-				}
-			}.runTaskLater(ProjectKorraItems.plugin, 1L);
+			Bukkit.getScheduler().runTaskLater(ProjectKorraItems.getInstance(), () -> fitemEq.item = prevItem, 1L);
 
 			inv.setItem(newSlot, prevItem);
 			inv.setItem(prevSlot, new ItemStack(Material.AIR));

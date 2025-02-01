@@ -14,11 +14,12 @@ example2:
 example3:
     DisplayName: <&2>Earth <&a>Walkers
     Material: GOLDEN_BOOTS
-    ShapedRecipe: GOLD_INGOT, AIR, GOLD_INGOT, GOLD_INGOT, DIRT:16, GOLD_INGOT  
+    ShapedRecipe: GOLD_INGOT, AIR, GOLD_INGOT, GOLD_INGOT, DIRT:16, GOLD_INGOT
     Stats:
-        EarthSmashFlightSpeed: 25
-        EarthSmashFlightDuration: 25
-        EarthSmashDamage: -15
+        EarthSmash:
+            Speed: x1.25
+            FlightDuration: x1.25
+            Damage: x0.85
         WearOnly: true
 example4:
     DisplayName: <&4><&l>BLAZE ROD!
@@ -26,8 +27,8 @@ example4:
     UnshapedRecipe: BLAZE_ROD:3, BLAZE_POWDER:3
     Stats:
         Charges: 20
-        BlazeArcRange: 30
-        BlazeRingRange: 30
+        Blaze:
+            Range: x1.3
         DestroyAfterCharges: true
         RequireElement: fire
         RequireWorld: world
@@ -41,7 +42,8 @@ example5:
         DestroyAfterCharges: true
         IgnoreDestroyMessage: true
         AllowFromInventory: true
-        LightningChargeTime: -300
+        Lightning:
+            ChargeTime: 0
         ParticleEffects: magiccrit:15:50:10:0
 example6:
     DisplayName: <&2>Cactus Juice
@@ -72,10 +74,14 @@ glider:
         DestroyAfterCharges: true
         IgnoreDestroyMessage: false
         AirGlide: true
-        AirBlastPushFactor: 20
-        AirBlastPushFactorForOthers: 20
-        AirSuctionPushFactor: 20
-        AirSwipePushFactor: 100
+        AirBlast:
+            SelfPush: x1.2
+            Knockback: x1.2
+        AirSuction:
+            Knockback: x1.2
+        AirSwipe:
+            Knockback: x2
+            KnockbackOthers: x2
 badgermoletunic:
     DisplayName: <&3>Badgermole Tunic
     Lore: <&8>The spirit of the badgermole lives on<n><&7>Focus your <&3>EarthTunnel <&7>into a smaller portion<n><&7>of earth, increasing the speed.
@@ -84,7 +90,8 @@ badgermoletunic:
     Stats:
         WearOnly: true
         SneakCharges: 25
-        EarthTunnelMaxRadius: -60
+        EarthTunnel:
+            Radius: x0.4
 northpolehelmet:
     DisplayName: <&b>Arctic Helmet of the North
     Lore: <&8>crafted in the northern water tribe<n><&7>Increases <&b>ice<&7> based abilities by <&e>20%<n><&7>Decreases <&9>water<&7> mobility abilities by <&e>20%.
@@ -94,18 +101,21 @@ northpolehelmet:
     Stats:
         LeatherColor: 85, 255, 255
         WearOnly: true
-        IceSpikeRange: 20
-        IceBlastRange: 20
-        IceBlastDamage: 20
-        IceSpikeDamage: 20
-        IceSpikePillarRange: 20
-        IceSpikePillarDamage: 20
-        IceSpikePillarFieldDamage: 20
-        SurgeWaveMaxFreezeRadius: 20
-        WaterSpoutHeight: -20
-        WaterSpoutWaveFlightDuration: -20
-        WaterSpoutWaveSpeed: -20
-        WaterSpoutWaveRadius: -20
+        IceBlast:
+            Range: x1.2
+            Damage: x1.2
+        IceSpike:
+            Radius: x1.2
+            Damage: x1.2
+        Surge:
+            FreezeRadius: x1.2
+        WaterSpout:
+            Height: x0.8
+            FlightDuration: x0.8
+            Speed: x0.8
+            WaveRadius: x0.8
+            IceSphereRadius: x0.8
+            ThawRadius: x0.8
 flameo:
     DisplayName: <&c>Flameo Chef Hat
     Lore: <&8>Buy <&4>'Flameo Instant Noodles!'<n><&8>The Noodliest Noodles in the United Republic!<n><&7>Greatly increases <&c>HeatControl<&7> cooking speed.
@@ -126,13 +136,15 @@ waterchestplate:
         LeatherColor: 85, 85, 255
         Charges: 100
         DestroyAfterCharges:
-        OctopusFormRange: 30
-        OctopusFormDamage: 30
-        OctopusFormKnockback: -50
-        OctopusFormRadius: 15
-        OctopusFormInterval: 30
-        TorrentDamage: 15
-        TorrentRange: -25
+        OctopusForm:
+            Range: x1.3
+            Damage: x1.3
+            Knockback: x0.5
+            Radius: x1.15
+            FormInterval: x1.3
+        Torrent:
+            Damage: x1.15
+            Range: x0.75
 antilag:
     DisplayName: <&c>Anti-Lag Machine
     Lore: <&8>Everyone loves you for using this item<n><&7>Decreases the radius of AirBubble<n><&7>and WaterBubble substantially!

@@ -83,7 +83,7 @@ public class Messages {
 		if (logDelay.containsKey(msg) && System.currentTimeMillis() - logDelay.get(msg) < LOG_DELAY)
 			return;
 		logDelay.put(msg, System.currentTimeMillis() + delay);
-		ProjectKorraItems.log.info(msg);
+		ProjectKorraItems.info(msg);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package com.projectkorra.items.abilityupdater;
 
+import com.projectkorra.projectkorra.ability.FireAbility;
 import org.bukkit.entity.Player;
 
 import com.projectkorra.projectkorra.firebending.Blaze;
@@ -36,7 +37,8 @@ public class FireUpdater {
 	 * @return if the ability was updated correctly
 	 */
 	
-	public static boolean updateAbilityDamage(Player player, Object ability, Map<String, Double> attribs) {
+	public static boolean updateAbilityDamage(Player player, FireAbility ability, Map<String, Double> attribs) {
+		ability.setAttribute(null, null);
 		if (ability instanceof FireBlast) {
 			FireBlast abil = (FireBlast) ability;
 			

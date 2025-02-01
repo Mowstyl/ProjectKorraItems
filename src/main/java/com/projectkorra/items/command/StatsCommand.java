@@ -7,7 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 import com.projectkorra.items.Messages;
-import com.projectkorra.items.attribute.Attribute;
+import com.projectkorra.items.attribute.PKIAttribute;
 import com.projectkorra.items.attribute.AttributeList;
 
 public class StatsCommand extends PKICommand {
@@ -32,10 +32,10 @@ public class StatsCommand extends PKICommand {
 				phrase = args.get(0);
 			}
 
-			List<Attribute> attribs = new ArrayList<>(AttributeList.ATTRIBUTES);
+			List<PKIAttribute> attribs = new ArrayList<>(AttributeList.ATTRIBUTES);
 			if (phrase != null) {
 				for (int i = 0; i < attribs.size(); i++) {
-					Attribute att = attribs.get(i);
+					PKIAttribute att = attribs.get(i);
 					if (!att.getName().toLowerCase().contains(phrase.toLowerCase())) {
 						attribs.remove(i);
 						i--;
@@ -50,7 +50,7 @@ public class StatsCommand extends PKICommand {
 			sender.sendMessage(ChatColor.YELLOW + " ---- " + ChatColor.GOLD + "Stats " + ChatColor.YELLOW + "-- " + ChatColor.GOLD + "Page " + ChatColor.RED + (page + 1) + ChatColor.GOLD + "/" + ChatColor.RED + (maxPage + 1) + ChatColor.YELLOW + " ----");
 			for (int i = pageIndex; i < pageIndex + Messages.LINES_PER_PAGE; i++) {
 				if (i < attribs.size()) {
-					Attribute att = attribs.get(i);
+					PKIAttribute att = attribs.get(i);
 					sender.sendMessage(ChatColor.YELLOW + att.getName() + ": " + ChatColor.WHITE + att.getDesc());
 				} else
 					break;

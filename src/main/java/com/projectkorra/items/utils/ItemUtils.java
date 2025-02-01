@@ -1,7 +1,7 @@
 package com.projectkorra.items.utils;
 
 import com.projectkorra.items.attribute.Action;
-import com.projectkorra.items.attribute.Attribute;
+import com.projectkorra.items.attribute.PKIAttribute;
 import com.projectkorra.items.attribute.AttributeList;
 import com.projectkorra.items.customs.PKItem;
 
@@ -23,7 +23,7 @@ public class ItemUtils {
 	/**
 	 * A map of player names that holds their current bending potion effects.
 	 **/
-	public static final Map<String, Map<String, Attribute>> currentBendingEffects = new ConcurrentHashMap<>();
+	public static final Map<String, Map<String, PKIAttribute>> currentBendingEffects = new ConcurrentHashMap<>();
 
 
 	/**
@@ -172,24 +172,16 @@ public class ItemUtils {
 			if (citem == null)
 				continue;
 
-			for (Attribute att : citem.getAttributes())
-				for (String allowedEff : validAttribs)
-					if (att.getName().equalsIgnoreCase(allowedEff)) {
-						List<PotionEffect> potEffects = AttributeUtils.parsePotionEffects(att);
-						List<Attribute> bendEffects = AttributeUtils.parseBendingEffects(att);
-
-						for (PotionEffect pot : potEffects)
-							player.addPotionEffect(pot, true);
-						effectAdded = true;
-
-						for (Attribute effect : bendEffects) {
-							if (!currentBendingEffects.containsKey(player.getName()))
-								currentBendingEffects.put(player.getName(), new ConcurrentHashMap<String, Attribute>());
-							effect.setTime(System.currentTimeMillis());
-							Map<String, Attribute> playerEffList = currentBendingEffects.get(player.getName());
-							playerEffList.put(effect.getName(), effect);
-						}
-					}
+			for (String allowedEff : validAttribs) {
+				PKIAttribute att = citem.getAttribute(allowedEff);
+				if (att == null)
+					continue;
+				for (Object rawPot : att.getValues()) {
+					PotionEffect pot = (PotionEffect) rawPot;
+					player.addPotionEffect(pot, true);
+				}
+				effectAdded = true;
+			}
 		}
 		if (effectAdded)
 			AttributeUtils.decreaseCharges(player, type);

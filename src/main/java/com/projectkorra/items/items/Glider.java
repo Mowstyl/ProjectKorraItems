@@ -1,7 +1,9 @@
 package com.projectkorra.items.items;
 
-import java.util.Map;
+import java.util.Collection;
 
+import com.projectkorra.items.attribute.PKIAttribute;
+import com.projectkorra.items.customs.PKItem;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -43,7 +45,7 @@ public class Glider {
 	 */
 	public Glider(Player player, final boolean auto) {
 		BendingPlayer bplayer = BendingPlayer.getBendingPlayer(player.getName());
-		if (player == null || bplayer == null)
+		if (bplayer == null)
 			return;
 
 		if (!player.isSneaking() && player.getLocation().getBlock().getType() == Material.AIR && bplayer.hasElement(Element.AIR)) {
@@ -62,34 +64,43 @@ public class Glider {
 						return;
 					}
 
-					Map<String, Double> attribs = AttributeUtils.getSimplePlayerAttributeMap(player);
 					if ((!player.isSneaking() && !auto) || (player.isSneaking() && auto)) {
 						this.cancel();
 						return;
 					}
 
-					if (attribs.containsKey("AirGlide")) {
-						double speed = AttributeList.AIR_GLIDE_SPEED;
-						double fallSpeed = AttributeList.AIR_GLIDE_FALL;
-						if (attribs.containsKey("AirGlideSpeed"))
-							speed = speed + speed * attribs.get("AirGlideSpeed") / 100.0;
-						if (attribs.containsKey("AirGlideFallSpeed"))
-							fallSpeed = fallSpeed + fallSpeed * attribs.get("AirGlideFallSpeed") / 100.0;
+					boolean hasGlider = false;
+					Collection<PKItem> items = AttributeUtils.getActivePKitems(player);
+					for (PKItem item : items) {
+						PKIAttribute glideAttr = item.getAttribute("AirGlide");
+						if (glideAttr != null && (boolean) glideAttr.getValues().getFirst()) {
+							hasGlider = true;
+							double speed = AttributeList.AIR_GLIDE_SPEED;
+							double fallSpeed = AttributeList.AIR_GLIDE_FALL;
+							PKIAttribute speedAttr = item.getAttribute("AirGlideSpeed");
+							PKIAttribute fallAttr = item.getAttribute("AirGlideFallSpeed");
+							if (speedAttr != null)
+								speed = speed + speed * (float) speedAttr.getValues().getFirst() / 100.0;
+							if (fallAttr != null)
+								fallSpeed = fallSpeed + fallSpeed * (float) fallAttr.getValues().getFirst() / 100.0;
 
-						Location loc = player.getEyeLocation();
-						loc.setPitch(0);
-						Vector vel = loc.getDirection();
-						vel.normalize();
-						vel.multiply(speed);
-						vel.setY(fallSpeed);
-						player.setFallDistance(0);
-						player.setVelocity(vel);
-						if (counter == 0)
-							AttributeUtils.decreaseCharges(player, Action.SHIFT);
-						counter++;
+							Location loc = player.getEyeLocation();
+							loc.setPitch(0);
+							Vector vel = loc.getDirection();
+							vel.normalize();
+							vel.multiply(speed);
+							vel.setY(fallSpeed);
+							player.setFallDistance(0);
+							player.setVelocity(vel);
+							if (counter == 0)
+								AttributeUtils.decreaseCharges(player, Action.SHIFT);
+							counter++;
+						}
 					}
+					if (!hasGlider)
+						this.cancel();
 				}
-			}.runTaskTimer(ProjectKorraItems.plugin, 1, 1);
+			}.runTaskTimer(ProjectKorraItems.getInstance(), 1, 1);
 		}
 	}
 }

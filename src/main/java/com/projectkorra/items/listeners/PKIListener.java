@@ -24,7 +24,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.projectkorra.items.attribute.Action;
-import com.projectkorra.items.attribute.Attribute;
+import com.projectkorra.items.attribute.PKIAttribute;
 import com.projectkorra.items.customs.PKIDisplay;
 import com.projectkorra.items.customs.PKIEquip;
 import com.projectkorra.items.customs.PKItem;
@@ -62,12 +62,12 @@ public class PKIListener implements Listener {
 				 * Remove the resultant slot because we don't wish to consider it for the purpose of
 				 * calculating the recipe.
 				 */
-				originalInvItems.remove(0);
+				originalInvItems.removeFirst();
 
 				List<ItemStack> invItemsClone = new ArrayList<>();
 
-				for (PKItem citem : PKItem.items.values()) {
-					if (citem.getRecipe().size() == 0)
+				for (PKItem citem : PKItem.getItems().values()) {
+					if (citem.getRecipe().isEmpty())
 						continue;
 
 					List<RecipeIngredient> recipeClone = new ArrayList<>(citem.getRecipe());
@@ -100,7 +100,7 @@ public class PKIListener implements Listener {
 								if (!ing.isCustomItem() && ing.getMaterial() == item.getType()
 										&& ing.getMaterial() == Material.POTION
 										&& item.getItemMeta() != null && item.getItemMeta() instanceof PotionMeta
-										&& ing.getPotionType() == ((PotionMeta) item.getItemMeta()).getBasePotionData().getType()
+										&& ing.getPotionType() == ((PotionMeta) item.getItemMeta()).getBasePotionType()
 										|| (citemInSlot != null && citemInSlot.getName().equals(ing.getCustomItemName()))) {
 
 									// Calculate the least possible maximum quantity that can result
@@ -124,7 +124,7 @@ public class PKIListener implements Listener {
 					 * recipe was correct, we can now determine whether or not we let the user
 					 * receive the item.
 					 */
-					if (recipeClone.size() == 0 && invItemsClone.size() == 0) {
+					if (recipeClone.isEmpty() && invItemsClone.isEmpty()) {
 						if (citem.isUnshapedRecipe() || validShape) {
 							ItemStack newItem = citem.generateItem();
 							newItem.setAmount(maxQuantity * newItem.getAmount());
@@ -136,7 +136,7 @@ public class PKIListener implements Listener {
 
 				}
 			}
-		}.runTaskLater(ProjectKorraItems.plugin, 1);
+		}.runTaskLater(ProjectKorraItems.getInstance(), 1);
 	}
 
 	/**
@@ -153,11 +153,10 @@ public class PKIListener implements Listener {
 			return;
 
 		HumanEntity humEnt = event.getWhoClicked();
-		if (!(humEnt instanceof Player))
+		if (!(humEnt instanceof Player player))
 			return;
 
-		Player player = (Player) humEnt;
-		ItemStack curItem = event.getCurrentItem();
+        ItemStack curItem = event.getCurrentItem();
 		if (curItem == null)
 			return;
 
@@ -178,8 +177,8 @@ public class PKIListener implements Listener {
 
 		invItems.set(0, new ItemStack(Material.AIR));
 
-		while (recipeClone.size() > 0) {
-			RecipeIngredient ing = recipeClone.get(0);
+		while (!recipeClone.isEmpty()) {
+			RecipeIngredient ing = recipeClone.getFirst();
 			int ingQuantity = ing.getQuantity() * amountCreated;
 
 			if (ing.getMaterial() != Material.AIR) {
@@ -189,7 +188,7 @@ public class PKIListener implements Listener {
 
 					if (!ing.isCustomItem() && ing.getMaterial() == Material.POTION
 							&& istack.getItemMeta() != null
-							&& ing.getPotionType() != ((PotionMeta) istack.getItemMeta()).getBasePotionData().getType()) {
+							&& ing.getPotionType() != ((PotionMeta) istack.getItemMeta()).getBasePotionType()) {
 						continue;
 					} else if (!ing.isCustomItem() && istack.getType() != ing.getMaterial()) {
 						continue;
@@ -212,7 +211,7 @@ public class PKIListener implements Listener {
 					}
 				}
 			}
-			recipeClone.remove(0);
+			recipeClone.removeFirst();
 		}
 
 		event.getInventory().clear();
@@ -230,7 +229,7 @@ public class PKIListener implements Listener {
 				fevent.getInventory().setContents(finalItems);
 				// fplayer.updateInventory(); // Not needed anymore
 			}
-		}.runTaskLater(ProjectKorraItems.plugin, 1);
+		}.runTaskLater(ProjectKorraItems.getInstance(), 1);
 	}
 
 	/**
@@ -246,13 +245,12 @@ public class PKIListener implements Listener {
 			return;
 
 		HumanEntity humEnt = event.getWhoClicked();
-		if (!(humEnt instanceof Player))
+		if (!(humEnt instanceof Player player))
 			return;
 
 		Inventory inv = event.getInventory();
-		Player player = (Player) humEnt;
 
-		for (PKIDisplay disp : PKIDisplay.displays.values())
+        for (PKIDisplay disp : PKIDisplay.displays.values())
 			if (disp.getInventory().equals(inv))
 				event.setCancelled(true);
 
@@ -339,12 +337,11 @@ public class PKIListener implements Listener {
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onCloseDisplayInv(InventoryCloseEvent event) {
 		HumanEntity humEnt = event.getPlayer();
-		if (!(humEnt instanceof Player))
+		if (!(humEnt instanceof Player player))
 			return;
 
 		Inventory inv = event.getInventory();
-		Player player = (Player) humEnt;
-		for (PKIDisplay disp : PKIDisplay.displays.values())
+        for (PKIDisplay disp : PKIDisplay.displays.values())
 			if (disp.getInventory().equals(inv)) {
 				PKIDisplay.displays.remove(player);
 				return;
@@ -460,9 +457,14 @@ public class PKIListener implements Listener {
 			return;
 
 		Player player = event.getPlayer();
-		Map<String, Double> attribs = AttributeUtils.getSimplePlayerAttributeMap(player);
-		boolean auto = Attribute.getBooleanValue("AirGlideAutomatic", attribs);
-		if (auto)
-			new Glider(player, true);
+		Collection<PKItem> activePKitems = AttributeUtils.getActivePKitems(player);
+		for (PKItem item : activePKitems) {
+			PKIAttribute attr = item.getAttribute("AirGlideAutomatic");
+			if (attr == null)
+				continue;
+			boolean auto = (boolean) attr.getValues().getFirst();
+			if (auto)
+				new Glider(player, true);
+		}
 	}
 }

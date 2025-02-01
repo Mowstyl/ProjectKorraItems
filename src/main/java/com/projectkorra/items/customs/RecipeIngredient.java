@@ -87,7 +87,7 @@ public class RecipeIngredient {
 				istack.setAmount(quantity);
 				return istack;
 			} else {
-				ProjectKorraItems.log.severe(Messages.ERROR_GENERATING_ITEM + ": " + customItemName);
+				ProjectKorraItems.severe(Messages.ERROR_GENERATING_ITEM + ": " + customItemName);
 				return new ItemStack(Material.AIR);
 			}
 		} else {

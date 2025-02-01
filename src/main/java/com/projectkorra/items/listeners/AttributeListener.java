@@ -1,15 +1,19 @@
 package com.projectkorra.items.listeners;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
+import com.projectkorra.items.abilityupdater.AbilityUpdater;
 import com.projectkorra.items.attribute.Action;
-import com.projectkorra.items.attribute.Attribute;
+import com.projectkorra.items.attribute.PKIAttribute;
 import com.projectkorra.items.customs.PKItem;
 import com.projectkorra.items.processors.EquipmentProcessor;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
+import com.projectkorra.projectkorra.ability.CoreAbility;
+import com.projectkorra.projectkorra.attribute.AttributeModification;
+import com.projectkorra.projectkorra.event.AbilityRecalculateAttributeEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,7 +31,6 @@ public class AttributeListener implements Listener {
 	/**
 	 * A map of player names that holds their current bending potion effects.
 	 **/
-	public static final Map<String, Map<String, Attribute>> currentBendingEffects = new ConcurrentHashMap<>();
 	private final EquipmentProcessor processor;
 	private final Plugin plugin;
 
@@ -82,10 +85,8 @@ public class AttributeListener implements Listener {
 	 * 
 	 * @param event a consume event
 	 */
-	@EventHandler(priority = EventPriority.NORMAL)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerConsume(PlayerItemConsumeEvent event) {
-		if (event.isCancelled())
-			return;
 		ItemUtils.updateOnActionEffects(event.getPlayer(), Action.CONSUME);
 	}
 
@@ -95,38 +96,68 @@ public class AttributeListener implements Listener {
 	 * 
 	 * @param event item change event
 	 */
-	@EventHandler(priority = EventPriority.NORMAL)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onChangeItem(PlayerItemHeldEvent event) {
-		if (event.isCancelled())
-			return;
-
 		Player player = event.getPlayer();
-		Map<String, Double> attribs = AttributeUtils.getSimplePlayerAttributeMap(player);
-		boolean auto = Attribute.getBooleanValue("AirGlideAutomatic", attribs);
-		if (auto) {
+		ItemStack newItem = player.getInventory().getItem(event.getNewSlot());
+		PKItem pkItem = PKItem.getCustomItem(newItem);
+		if (pkItem == null)
+			return;
+		PKIAttribute attr = pkItem.getAttribute("AirGlideAutomatic");
+		if (attr == null)
+			return;
+		boolean auto = (boolean) attr.getValues().getFirst();
+		if (auto)
 			new Glider(player, true);
-		}
 	}
 
-	@EventHandler(priority = EventPriority.HIGH)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(event.getPlayer());
-			if (bendingPlayer == null || !bendingPlayer.hasElement(Element.WATER)) {
+			if (bendingPlayer == null || !bendingPlayer.hasElement(Element.WATER))
 				return;
-			}
 			List<ItemStack> equipment = ItemUtils.getPlayerValidEquipment(event.getPlayer());
 			for (ItemStack istack : equipment) {
 				PKItem citem = PKItem.getCustomItem(istack);
 				if (citem == null)
 					continue;
-				for (Attribute attr : citem.getAttributes()) {
-					if (attr.getName().equals("WaterSource")) {
+				for (Map.Entry<String,PKIAttribute> attr : citem.getAttributes().entrySet()) {
+					if (attr.getKey().equals("WaterSource") && (boolean) attr.getValue().getValues().getFirst()) {
 						bendingPlayer.setWaterPouch(true);
 						return;
 					}
 				}
 			}
 		}, 20);
+	}
+
+	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+	public void onAbilityInstanced(AbilityRecalculateAttributeEvent event) {
+		CoreAbility ability = event.getAbility();
+		Player player = ability.getPlayer();
+		if (player == null)
+			return;
+		AbilityUpdater.updatePlayerParticles(player);
+		Collection<PKItem> activeItems = AttributeUtils.getActivePKitems(player);
+		for (PKItem item : activeItems) {
+			Map<String, AttributeModification> modifiers = item.getModifiers(ability.getName());
+			if (modifiers.containsKey(event.getAttribute())) {
+				event.addModification(modifiers.get(event.getAttribute()));
+				continue;
+			}
+			Element element = ability.getElement();
+			boolean fail = false;
+			modifiers = item.getModifiers(element.getName());
+			if (modifiers.containsKey(event.getAttribute()))
+				event.addModification(modifiers.get(event.getAttribute()));
+			else
+				fail = true;
+			if (fail && element instanceof Element.SubElement subElement) {
+				modifiers = item.getModifiers(subElement.getParentElement().getName());
+				if (modifiers.containsKey(event.getAttribute()))
+					event.addModification(modifiers.get(event.getAttribute()));
+			}
+		}
 	}
 }

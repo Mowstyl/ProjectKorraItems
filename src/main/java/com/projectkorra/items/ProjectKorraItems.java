@@ -2,6 +2,7 @@ package com.projectkorra.items;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.projectkorra.items.listeners.PKIListener;
@@ -20,9 +21,29 @@ import com.projectkorra.items.command.StatsCommand;
 import com.projectkorra.items.customs.PKIDisplay;
 
 public class ProjectKorraItems extends JavaPlugin {
-	public static ProjectKorraItems plugin;
-	public static Logger log;
+	private static ProjectKorraItems plugin;
+	private static Logger log;
 	private AttributeListener attrListener;
+
+	public static ProjectKorraItems getInstance() {
+		return plugin;
+	}
+
+	public static void log(Level level, String record) {
+		log.log(level, record);
+	}
+
+	public static void info(String record) {
+		log.info(record);
+	}
+
+	public static void warning(String record) {
+		log.warning(record);
+	}
+
+	public static void severe(String record) {
+		log.severe(record);
+	}
 
 	@Override
 	public void onEnable() {
