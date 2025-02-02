@@ -308,7 +308,7 @@ public class PKItem {
 		return material;
 	}
 
-	public void addAttribute(PKIAttribute attribute) {
+	public void addAttribute(@NonNull PKIAttribute attribute) {
 		attributes.put(attribute.getName(), attribute);
 	}
 

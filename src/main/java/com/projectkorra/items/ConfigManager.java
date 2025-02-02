@@ -116,9 +116,8 @@ public class ConfigManager {
 	private void updateAttributes(@NonNull PKItem item, @NonNull ConfigurationSection cs) {
 		for (String attributeName : cs.getKeys(false)) {
 			PKIAttribute att = PKIAttribute.getAttribute(attributeName);
-			if (att == null) {
+			if (att == null)
 				ProjectKorraItems.info(Messages.BAD_ATTRIBUTE + ": " + attributeName);
-			}
 			if (att != null && !att.isAbility()) {
 				String valueStr = cs.getString(attributeName);
 				if (valueStr == null)
@@ -155,7 +154,8 @@ public class ConfigManager {
 				ConfigurationSection data = cs.getConfigurationSection(attributeName);
 				parseAbilityAttribute(item, attributeName, Objects.requireNonNull(data));
 			}
-			item.addAttribute(att);
+			if (att != null)
+				item.addAttribute(att);
 		}
 	}
 
