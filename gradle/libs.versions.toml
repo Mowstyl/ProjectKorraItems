@@ -10,11 +10,13 @@ generatePOMGradlePlugin = "3.0.0"
 spotBugsGradlePlugin = "6.1.2"
 userdevGradlePlugin = "2.0.0-beta.14"
 
-bukkitAPI = "1.21.4-R0.1-SNAPSHOT"
-oraxen = "1.188.0"
-projectKorra = "master-SNAPSHOT"
+bukkitAPI = "1.21.8-R0.1-SNAPSHOT"
+oraxen = "1.192.0"
+projectKorra = "1.12.0"
+# projectKorra = "master-SNAPSHOT"
 
 [libraries]
 papermc-paperapi = { group = "io.papermc.paper", name = "paper-api", version.ref = "bukkitAPI" }
 thorgal-oraxen = { group = "io.th0rgal", name = "oraxen", version.ref = "oraxen" }
-projectkorra-core = { group = "com.github.Mowstyl.ProjectKorra", name = "core", version.ref = "projectKorra" }
+projectkorra-core = { group = "com.projectkorra", name = "projectkorra", version.ref = "projectKorra" }
+# projectkorra-core = { group = "com.github.Mowstyl.ProjectKorra", name = "core", version.ref = "projectKorra" }

@@ -53,15 +53,19 @@ repositories {
             includeGroupByRegex("com\\.github\\..*")
         }
     }
+    mavenLocal {
+        content {
+            includeGroup("com.projectkorra")
+        }
+    }
     mavenCentral()
-    // mavenLocal()
 }
 
 dependencies {
     //paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")  // NMS
     compileOnly(libs.papermc.paperapi)
-    //compileOnly(libs.projectkorra.core)
-    compileOnly(files("D:\\Users\\Mowser\\Documents\\WorkSpace\\ProjectKorra\\target\\ProjectKorra-1.12.0-BETA-10.jar"))
+    compileOnly(libs.projectkorra.core)
+    //compileOnly(files("D:\\Users\\Mowser\\Documents\\WorkSpace\\ProjectKorra\\target\\ProjectKorra-1.12.0-BETA-10.jar"))
     compileOnly(libs.thorgal.oraxen) {
         isTransitive = false
     }
